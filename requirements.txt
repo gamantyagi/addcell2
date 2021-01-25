@@ -27,3 +27,4 @@ tox-travis==0.12
 urllib3==1.25.9
 virtualenv==16.7.9
 zipp==2.1.0
+gunicorn==20.0.4
