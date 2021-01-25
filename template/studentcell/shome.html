@@ -1,0 +1,156 @@
+{% extends 'clubcell/base_up.html' %}
+{% load static %}
+{% block content %}
+<style>
+.notify-badge{
+    position: absolute !important;
+    top:5px !important;
+    left: 20px; !important;
+    background:green !important;
+    text-align: center !important;
+    border-radius: 30px 30px 30px 30px !important;
+    color:white !important;
+    padding:5px 10px !important;
+    font-size:20px !important;
+}
+</style>
+
+<div class="features-boxed" >
+        <div class="container">
+            <center>
+            <div class="intro" style="max-width: 892px;">
+                <h1 class="text-center">Welcome {{user.first_name}} {{user.last_name}}</h1>
+
+            </div></center>
+            <div class="filtr-controls" style="user-select: none;"><span  data-filter="all" onclick="window.location.href='{% url 'student profile' %}'">Your Profile</span>
+                <span class="active" data-filter="1" onclick="window.location.href='{% url 'student explore' %}'">Explore</span>
+
+                <span data-filter="3" onclick="window.location.href='{% url 'student posts' %}'">Posts</span></div>
+<!--                <span data-filter="3">Trending</span><span data-filter="3">Top list</span></div>-->
+                <hr width="100%">
+                <div class="row features">
+                {% for event in events_todo %}
+
+                    {% if event.registration == True %}
+                <div class="col-sm-12 col-md-6 col-lg-4" data-toggle="tooltip" title="{{event.eventname}}:: {{event.breif_about}}" >
+                <form class="col-sm-12 col-md-12 col-lg-12" >
+
+                <div class=" item" id="dibba"   style="margin-bottom: 2em; margin-left: 1em;box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12); ">
+
+                    <div class="box" id="box"    style="background-color: #f2f2f2;opacity: 1; border: 1px solid #e0ebeb;cursor:pointer;">
+
+                        <div class="image-box" onclick="window.location.href='{{path}}/event/{{event.event_uen}}'" style="width: 100%; height:200px; overflow:hidden;" >
+                            {% if event.paid == False %}<span class="notify-badge">free</span>{% endif %}
+                            <img class="box-image img-responsive" src='{{ event.event_thumbnail.thumbnail.800x300 }}' style="width:inherit;height:inherit"></div>
+                        <div class="text-left info-box"   >
+                            <div onclick="window.location.href='{{path}}/event/{{event.event_uen}}'"  style="cursor:pointer;">
+                            <h3 class="text-center name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{event.eventname}}</h3>
+                            <p class="description" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{event.breif_about}}|</p>
+                            <p class="description">Date: {{event.heldon}}<br>fee: {{event.fee}}<br>Type: {{event.get_eventtype_display}}<br>Duty leave: {{event.dl|yesno:"Available,No,No"}}</p>
+                            </div >
+                                {% if event in event_registered %}
+                            <button type="button"   class="btn-outline-success" style="width:50%;background-color: #e6e600;border:#000000;color:#b32d00;" disabled>In ToDo</button><button type="button"  class="btn-outline-success"  style="width:50%;background-color: #e6e600;border: #b3b300;color:#b32d00;" disabled>Registered</button>
+                            {% else %}
+                            <button type="button" id="wl{{event.event_uen}}" value="{{event.event_id}}"   class="btn-outline-success wishlist " style="width:49.5%;">Wishlist</button><button type="button"  class="btn-outline-success registerev " value="{{event.event_id}}" id="rg{{event.event_uen}}" style="width:49.5%;float:right;">Register</button>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                </form></div>
+                    {% endif %}
+                {% endfor %}
+
+                </div>
+        </div>
+    </div>
+
+<style>
+
+form:hover {
+          background-color: #F8F8F8;
+
+
+        }
+</style>
+
+<script>
+    $(document).ready(function(){
+  $(".registerev").click(function(){
+  var elmValue = $(this).attr("value");
+  $.ajax({
+            url: "{% url 'event register' %}",
+            type: "POST",
+            data: {
+                'element': elmValue,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(result) {
+            console.log(result);
+            if(result == "wrong"){
+               alert("Something gone wrong");
+            }
+            else if(result == "closed"){
+               alert("registration closed, not registered.");
+            }
+            else if(result.result == "show_form"){
+               window.open(result.redirectTo,'popUpWindow','height=600,width=500,left=10,top=10,,,menubar=no');
+               return false;
+            }
+            else if(result == "Already registered"){
+               alert("Event already registered.");
+            }
+            else{
+                $("#rg" + result).html("<b>Registered</b>");
+                $("#rg" + result).attr("disabled",true);
+                $("#rg" + result).css("background-color","green");
+                $("#rg" + result).css("color","white");}
+                },
+            error: function(result){
+                alert("something gone wrong");}
+            });
+  });
+
+});
+</script>
+<script>
+     $(document).ready(function(){
+    $(".wishlist").click(function(){
+  var elmValue = $(this).attr("value");
+  $.ajax({
+            url: "{% url 'event wishlist' %}",
+            type: "POST",
+            data: {
+                'element': elmValue,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(result) {
+
+            if(result == "wrong"){
+               alert("Something went wrong, error in request.");
+            }
+            else if(result == "already wishlist") {
+
+               alert("Already in your wishlist.");
+            }
+            else if(result == "closed"){
+               alert("registrations  closed, not registered.");
+            }
+            else if(result == "Already registered"){
+               alert("No need to wishlist, you already in this event :-).");
+            }
+            else{
+
+                $("#wl" + result).html("<b>Wishlisted</b>");
+                $("#wl" + result).attr("disabled",true);
+                $("#wl" + result).css("background-color","green");
+                $("#wl" + result).css("color","white");
+                }
+             },
+            error: function(result){
+                alert("something gone wrong, its an error. No respond from server.");}
+            });
+
+  });
+  });
+
+</script>
+{% endblock %}

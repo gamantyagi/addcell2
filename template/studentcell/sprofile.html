@@ -1,0 +1,77 @@
+{% extends 'clubcell/base_up.html' %}
+{% load static %}
+{% block content %}
+<style>
+.notify-badge{
+    position: absolute !important;
+    top:5px !important;
+    left: 20px; !important;
+    background:green !important;
+    text-align: center !important;
+    border-radius: 30px 30px 30px 30px !important;
+    color:white !important;
+    padding:5px 10px !important;
+    font-size:20px !important;
+}
+</style>
+
+<script>
+	function load_events(to_load){
+        $('#event_box_cont').html("<centre style='height:700px;'><div class='loader'></div></centre>");
+        $.ajax({
+            type: "POST",
+            url: "{% url 'user profile load' %}",
+            data: {
+            'to_load': to_load,
+             'csrfmiddlewaretoken': '{{ csrf_token }}'},
+            success : function(html) {
+                 $('#event_box_cont').html(html);
+             }
+                });
+                            }
+</script>
+
+<div class="features-boxed" style="min-height:100vh;">
+        <div class="container">
+            <center>
+            <div class="intro" style="max-width: 892px;">
+                <h1 class="text-center">Welcome {{user.first_name}} {{user.last_name}}</h1>
+
+            </div></center>
+            <div class="filtr-controls" style="user-select: none;" ><span  data-filter="all" class="active" onclick="window.location.href='{{path}}/student/profile'">Your Profile</span>
+                <span data-filter="1" onclick="window.location.href='{{path}}/student/explore'">Explore</span>
+<!--                <span data-filter="2">Recommended</span>-->
+                <span data-filter="3" onclick="window.location.href='{{path}}/student/posts'">Posts</span></div>
+<!--                <span data-filter="3">Trending</span><span data-filter="3">Top list</span></div>-->
+                <hr width="100%">
+                        <div><button onclick="load_events('registered')" style="width:49.9%;">Registered events</button><button onclick="load_events('wishlist')" style="width:49.9%;float:right;">Wishlist events</button></div>
+
+                <div class="row features" id="event_box_cont" style="margin-top:1rem;">
+                {% for event in events_participants %}
+
+                <div class="col-sm-12 col-md-6 col-lg-4">
+                <form class="col-sm-12 col-md-12 col-lg-12" >
+
+                <div  id="dibba"   style="margin-bottom: 2em; margin-left: 1em;box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12); ">
+
+                    <div class="box" id="box"   style="background-color: #f2f2f2;opacity: 1; border: 1px solid #e0ebeb;">
+                        <div class="image-box"  ><img class="box-image img-responsive" src='{% static ""%}event.jpg'>{% if event.events.paid == False %}<span class="notify-badge">free</span>{% endif %}</div>
+                        <div class="text-left info-box"   >
+                            <div onclick="window.location.href='{{path}}/event/{{event.events.event_uen}}'" style="cursor:pointer;">
+                            <h3 class="text-center name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{event.events.eventname}}</h3>
+                            <p class="description" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{event.events.breif_about}}|</p>
+                            <p class="description">Date: {{event.events.heldon}}<br>fee: {{event.events.fee}}<br>Type: {{event.events.eventtype}}<br>Duty leave: {{event.events.dl}}</p>
+                            </div >
+                                 </div>
+                    </div>
+                </div>
+                </form></div>
+
+                {% endfor %}
+
+                </div>
+        </div>
+</div>
+
+
+{% endblock %}

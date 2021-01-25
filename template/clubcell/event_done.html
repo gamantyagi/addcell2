@@ -1,0 +1,177 @@
+{% extends 'clubcell/base2.html' %}
+{% load static %}
+{% block content %}
+<style>
+.notify-badge{
+    position: absolute !important;
+    top:5px !important;
+    left: 20px; !important;
+    background:#285bad !important;
+    text-align: center !important;
+    border-radius: 30px 30px 30px 30px !important;
+    color:white !important;
+    padding:5px 10px !important;
+    font-size:15px !important;
+}
+</style>
+<script>
+  function load_event_group(group_id, group_name) {
+  $('#eventholder').prepend("<centre>Loading '"+group_name+"', Please wait..</centre>");
+  $.ajax({
+            url: "{% url 'load event group' %}",
+            type: "POST",
+            data: {
+                'group_id': group_id,
+                'group_name': group_name,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(html) {
+                $('#eventholder').html(html);
+            },
+            error: function(result){
+
+                }
+          });
+          }
+
+   function create_group_show() {
+    $('#create-group-button').hide();
+    $('#creategroup').show();
+          }
+
+   function create_group(parent_group, pk) {
+    group_name = document.getElementById('creategroupinput').value;
+    document.getElementById('creategroupinput').value = "";
+    $.ajax({
+            url: "{% url 'create event group' %}",
+            type: "POST",
+            data: {
+                'parent_group': parent_group,
+                'pk': pk,
+                'group_name': group_name,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(html) {
+                $('#cardborder').append(html);
+            },
+            error: function(result){
+
+                }
+          });
+          }
+
+</script>
+
+
+<div id="eventholder">
+<div class="card">
+  <div class="card-body">
+    <a href='#' onclick="load_event_group('0','0')">Home/</a>
+  <button class="btn btn-success" id="create-group-button" onclick="create_group_show()" style="float: right;"><i class="fa fa-plus"></i> Create new group folder</button>
+<div id="creategroup" style="float:right"><input id="creategroupinput"  placeholder="enter group name" name="create_group_name" type="text"><button  id="creategroupsubmit" onclick="create_group('{{pname}}', '{{pk}}')">Create</button>
+</div>
+  </div>
+  </div>
+<div class="cards-list" id="cardborder" style="width:100%;">
+{% for group in groups %}
+<div class="cardf {{group.pk}} col-sm-6 col-md-4 col-lg-3" onclick="load_event_group('{{group.pk}}','{{group.group_name}}')" style="display: inline-block;">
+  <div class="card_image " style="width:100%;"> <img src="{{group.thumbnail}}" style="box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);"/> </div>
+  <div class="card_title title-white">
+    <p>{{group.group_name}}</p>
+  </div>
+</div>
+  {% endfor %}
+</div>
+
+         <div class="row features" id="event_box_cont" style="margin-top:1rem;">
+                {% for event in events_done %}
+
+                <div class="col-sm-12 col-md-6 col-lg-3"  data-toggle="tooltip" title="{{event.eventname}}:: {{event.breif_about}}">
+                <form class="col-sm-12 col-md-12 col-lg-12" >
+
+                <div  id="dibba"   style="margin-bottom: 2em; margin-left: 1em; box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);">
+
+                    <div class="box" id="box"   style="background-color: #f2f2f2;opacity: 1; border: 1px solid #e0ebeb;">
+                        <div class="image-box" style="width:100%;" ><img class="box-image img-responsive" src='{{ event.event_thumbnail.thumbnail.800x300 }}' style="width:inherit;">
+                            <span class="notify-badge">{{event.get_event_complete_display}}</span></div>
+                        <div class="text-left info-box"   >
+                            <div onclick="window.location.href='{{path}}/event/{{event.events.event_uen}}'" style="cursor:pointer;">
+                            <h3 class="text-center name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{event.eventname}}</h3>
+                            <p class="description" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{event.breif_about}}|</p>
+                            <p class="description">Date: {{event.heldon}}<br>fee: {{event.fee}}<br>Type: {{event.get_eventtype_display}}<br>Duty leave: {{event.dl|yesno}}</p>
+                            </div >
+                                 </div>
+                    </div>
+                </div>
+                </form></div>
+
+                {% endfor %}
+
+            </div>
+
+</div>
+
+
+
+
+
+<style>
+
+    #nb5 {background-color: #1f49c7;}
+
+
+.cardf {
+  margin: 30px;
+
+  height: 150px;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: 0.4s;
+}
+
+.cardf .card_image {
+  width: inherit;
+  height: inherit;
+  border-radius: 00px;
+
+}
+
+.cardf .card_image img {
+  width: inherit;
+  height: inherit;
+  border-radius: 40px;
+  object-fit: cover;
+}
+
+.cardf .card_title {
+  text-align: center;
+  border-radius: 0px 0px 40px 40px;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 30px;
+  margin-top: -80px;
+  height: 40px;
+   -webkit-text-stroke-width: 1px;
+   -webkit-text-stroke-color: black;
+}
+/*
+.cardf:hover {
+  transform: scale(1, 1);
+  box-shadow: 5px 5px 30px 15px rgba(0,0,0,0.25),
+    -5px -5px 30px 15px rgba(0,0,0,0.22);
+}
+*/
+.title-white {
+  color: white;
+}
+
+.title-black {
+  color: black;
+}
+
+</style>
+<script>
+  $('#creategroup').hide();
+</script>
+
+{% endblock %}
